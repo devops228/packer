@@ -1,0 +1,40 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region": "ap-southeast-2",
+    "ssh_username": "ec2-user",
+    "base_ami": "ami-075caa3491def750b",
+    "instance_type": "t2.micro"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key` }}",
+      "region": "{{user `region` }}",
+      "source_ami": "{{user `base_ami`}}",
+      "instance_type": "{{user `instance_type` }}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ami_name": "packer-base-{{timestamp}}",
+      "associate_public_ip_address": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "echo UPDATE BOX",
+        "sudo sudo yum update -y",
+        "echo INSTALL APPACHE PHP MYSQL",
+        "sudo yum install -y httpd24 php71 mysql56-server php71-mysql",
+        "echo START APACHE",
+        "sudo service httpd start",
+        "sudo chkconfig httpd on",
+        "echo SETTING FILE PERMISSION",
+        "sudo chown -R ec2-user:ec2-user /var/www/",
+        "echo '<h1>Welcome to Packer</h1>' > /var/www/html/index.html" 
+      ]
+    }
+  ]
+}
